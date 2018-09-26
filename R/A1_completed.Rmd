@@ -1,0 +1,115 @@
+---
+title: "A1 Completed"
+author: "SUS Teaching Team"
+date: "September 26, 2018"
+output: 
+  html_document:
+editor_options: 
+  chunk_output_type: console
+chunk_output_type: console
+---
+
+The document you're reading is referred to as an R markdown. For a number of hepful hints, refer to the cheatsheets found in the help menu of RStudio. The documentation [here](https://rmarkdown.rstudio.com/lesson-1.html) is also quite helpful and I often find myself [here](https://yihui.name/knitr/options/) reviewing what the various chunk options are.
+
+The section at the top of the R markdown is an optional YAML header surrounded by `---`s. For more information, see [here](https://bookdown.org/yihui/rmarkdown/html-document.html).
+
+An R markdown has "chunks" of code surrounded by three backticks ` ``` `s which are run in sequence. All other text (like this paragraph) is here to help with interpretability.
+
+Chunks start with `{r [name of chunk], [chunk options]}`. You can also set global chunk options (see link above). The first chunk below includes `echo = TRUE` which just sets R source code to be included in the output file.
+
+```{r Setup global chunk options}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The next chunk loads libraries which are necessary to run specific code in later chunks. Note that these need to be installed in RStudio before running. This can be done quickly by going to Tools > Install Packages and inserting `rmarkdown knitr stringi magrittr readr dplyr ggplot2 tidyr scales rgdal sp classInt RColorBrewer rgeos ggmap mapview`. Make sure "Install dependecies" is checked. You can read about each of these libraries online.
+
+```{r Load required libraries}
+library(rmarkdown)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(scales)
+library(rgdal)
+library(sp)
+library(classInt)
+library(RColorBrewer)
+library(rgeos)
+library(ggmap)
+library(mapview)
+```
+
+Next we will load the PG&E data. A number of R functions allow you to enter an arbitrary number of objects as arguments and `rbind` is no exception. Because we want the data in long format, we can simply pass in four `read_csv` functions (using `readr` library) and voila, our data is imported and stored as a single object in long format. 
+
+```{r Load PG&E data}
+elec <- rbind(read_csv("S:/CEE224X/A1/Data/PGE_2017_Q1_ElectricUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q2_ElectricUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q3_ElectricUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q4_ElectricUsageByZip.csv"))
+gas <- rbind(read_csv("S:/CEE224X/A1/Data/PGE_2017_Q1_GasUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q2_GasUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q3_GasUsageByZip.csv"), read_csv("S:/CEE224X/A1/Data/PGE_2017_Q4_GasUsageByZip.csv"))
+```
+
+Next, we convert kWh and therms to kBTU. A quick Google Search will yield the following:
+1 kwh = 3.4121416331 kbtu
+1 thm = 99.9761 kbtu
+
+```{r Unit conversions}
+elec$total_kbtu   <- elec$TOTALKWH*3.4121416331
+gas$total_kbtu   <- gas$TOTALTHM*99.9761
+```
+
+The following chunk of code makes use of the pipe symbol `%>%` and the `filter` function from the `dplyr` library. The `dplyr` library is part of the bigger [tidyverse](https://www.tidyverse.org/) created by [Hadley Wickham](http://hadley.nz/), basically a data science deity, and others. This library, and the entire tidyverse for that matter, provide a number of useful functions that make common data manipulations (e.g. filter, making wide, making long, na_replacement, left/right joins, etc.) quite easy. It's likely that you'll come across a number of tidyverse functions as you searched the web for solutions. 
+
+As for the pipe symbol `%>%`, you'll find this quite useful when needing to perform a few operations in a row. For a discussion of some of the details and to see a few examples, I'll refer you to [here](http://r4ds.had.co.nz/pipes.html#piping-alternatives), chapter 18. In summary, the pipe sends the output from the left hand side into the first argument of the function on the right hand side. The `dplyr` library is designed specifically to accommodate this. Although the below example is rather simple and the code would still be pretty readable without it, I'm sure you can imagine that the pipe symbol is quite useful when chaining together 6+ functions to form a pipeline. In that case, it prevents the unnecessary creation of intermediate objects. 
+
+```{r Filter both to residential only}
+elec <- elec %>% filter(CUSTOMERCLASS == "Elec- Residential")
+gas  <- gas %>% filter(CUSTOMERCLASS == "Gas- Residential")
+colnames(gas)[6] <- "GASCUSTOMERS"
+colnames(elec)[6] <- "ELECCUSTOMERS"
+```
+
+Next, we combine the two datasets together using `rbind`.
+
+```{r Combine elec and gas datasets}
+gas_elec <- bind_rows(elec, gas) %>% mutate_all(funs(replace(.,is.na(.),0)))
+```
+
+Next we get monthly summaries and plot them. The `group_by` and `summarize` functions are also from the `dplyr` library. The documentation, founding by searching help or typing ?function_name in the console, on these is fairly helpful and I'll refer you to that. Put simply, this series of functions is similar to a pivot table in Excel. It's used to aggregate data and is often quite fast.
+
+[This](http://r4ds.had.co.nz/data-visualisation.html) is a good explainer for ggplot.
+
+```{r Find the monthly totals for each type and plot}
+monthly_summaries <- gas_elec %>% group_by(CUSTOMERCLASS, MONTH) %>% summarize(monthly_total = sum(total_kbtu))
+ggplot(monthly_summaries, aes(as.factor(MONTH), monthly_total)) + geom_bar(stat = "identity", aes(fill = CUSTOMERCLASS), position = "dodge") + labs(x = "Month", y = "kBTU", title = "PG&E Territory Monthly Energy Usage, 2017", fill = "Energy Type")
+```
+
+Next, add the totals up for customer and energy for whole year by zip code, then find average kBTU per customer. Note that we sum up electricity customers and gas customers separately in each zip code first, and then take the greater of the two to be "total customers". After dividing total kBTU by total customers in each zip code, since that result is the average MONTHLY kBTU per customer, we multiply by 12 to get average ANNUAL kBTU per customer. 
+
+```{r Calculate zip code averages}
+zip_yearly_avg <- gas_elec %>% group_by(ZIPCODE) %>% summarise(total_kbtu = sum(total_kbtu), total_elec = sum(ELECCUSTOMERS), total_gas = sum(GASCUSTOMERS))
+zip_yearly_avg$total_custs <- apply(zip_yearly_avg[,c(3,4)],1,max)
+# Remove entries with 0 customers
+zip_yearly_avg <- zip_yearly_avg %>% filter(total_custs > 0)
+zip_yearly_avg$yearly_avg <- zip_yearly_avg$total_kbtu/zip_yearly_avg$total_custs*12
+zip_yearly_avg$ZIPCODE <- as.character(zip_yearly_avg$ZIPCODE)
+```
+
+Now we deal with the SimplyAnalytics shapefile. From the `rgdal` package, we have the `readOGR` function. This allows R to import shapefiles, and other spatial data formats, as R objects that allow for further manipulation and analysis. 
+
+```{r Load shapefile}
+ca_zips <- readOGR(dsn = "S:/CEE224X/A1/data/ca_zips", layer = "ca_zips")
+```
+
+```{r Join shapefile and csv}
+ca_zips <- ca_zips[ca_zips@data$spatial_id %in% zip_yearly_avg$ZIPCODE,]
+ca_zips@data <- ca_zips@data %>% left_join(zip_yearly_avg, by = c("spatial_id" = "ZIPCODE"))
+```
+
+The following chunk plots the map using mapview, which you can read about [here](https://r-spatial.github.io/mapview/). `breaks.qt` is using the `classInt` library to establish the 5 intervals by which to split up the "yearly_avg" value using Jenks, and is then rounded to 2 significant figures. `my.palette` is using the `RColorBrewer` package to set 5 shades of red. 
+
+```{r Plot map}
+breaks.qt <- classIntervals(ca_zips@data$yearly_avg, n = 5, style = "jenks", intervalClosure = "right")
+breaks.qt$brks <- breaks.qt$brks %>% signif(digits = 2)
+my.palette <- brewer.pal(n = 5, name = "Reds")
+
+mapview(ca_zips, "yearly_avg", col = "transparent", col.regions = my.palette, at = breaks.qt$brks, legend = TRUE, layer.name = "Average Energy Use in kBTU")
+#mapview(ca_zips, "yearly_avg", sp.layout = sp.raster, col = "transparent", col.regions = my.palette, at = breaks.qt$brks, legend = TRUE, layer.name = "Average Energy Use in kBTU")
+```
