@@ -3,7 +3,9 @@ Name:
 
 #### Q1: What are the “Combined” fields referring to? How do you think this information may affect our analyses?
 
-If a zip code contains “a minimum of 100 Residential customers; a minimum of 15 Non-Residential customers, with no single Non-Residential customer accounting for more than 15% of the total consumption,” it is then combined with that of another zip code. Within the dataset, when there is a ‘Y’ for the ‘Combined’ column (I believe) it means that there’s another zip code (or group of zip codes) associated with that zip code being presented.
+If a zip code contains “a minimum of 100 Residential customers; a minimum of 15 Non-Residential customers, with no single Non-Residential customer accounting for more than 15% of the total consumption,” it is then combined with that of another zip code. 
+
+Within the dataset, when there is a ‘Y’ for the ‘Combined’ column (I believe) it means that there’s another zip code (or group of zip codes) associated with that zip code being presented.
 
 When analyzing this data, this may overrepresent one zip code (the one that is combined), whereas another zip code may not be represented at all.
 
