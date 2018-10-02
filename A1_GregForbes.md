@@ -12,7 +12,9 @@ When analyzing this data, this may overrepresent one zip code (the one that is c
 
 #### Q2: Why are the “Average” fields likely not useful for our analyses?
 
-This average value is monthly. We cannot combine an average value for one month with another. In the first place, we don’t have information regarding the total customers involved in the process. What we want is to compute an average based on the total energy consumption across a year, and because we don’t have the proper information regarding all customers involved (and whether they use electricity, gas, or both), the average monthly energy consumption values are worthless.
+This average value is monthly. We cannot combine an average value for one month with another. In the first place, we don’t have information regarding the total customers involved in the process.
+
+What we want is to compute an average based on the total energy consumption across a year, and because we don’t have the proper information regarding all customers involved (and whether they use electricity, gas, or both), the average monthly energy consumption values are worthless.
 
 
 
