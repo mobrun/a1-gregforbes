@@ -9,6 +9,7 @@ Within the dataset, when there is a ‘Y’ for the ‘Combined’ column (I bel
 
 When analyzing this data, this may overrepresent one zip code (the one that is combined), whereas another zip code may not be represented at all.
 
+This matches my understanding of the combined field and how it affects our analyses.
 
 #### Q2: Why are the “Average” fields likely not useful for our analyses?
 
@@ -16,7 +17,7 @@ This average value is monthly. We cannot combine an average value for one month 
 
 What we want is to compute an average based on the total energy consumption across a year, and because we don’t have the proper information regarding all customers involved (and whether they use electricity, gas, or both), the average monthly energy consumption values are worthless.
 
-
+True. In my response I focused on the discrepancy between comparing electricity and gas as different measures of energy.  The overlap between gas and electricity customers is very important as well.
 
 #### Q3: What type of calculations should "X" and "Y" be in the step above? Why?
 
@@ -28,7 +29,7 @@ N/A
 
 The total annual electricity consumption per customer is 1.06 * 1011 kBtu (electricity) + 1.83 * 1011 kBtu (Gas Consumption) = 2.89 *1011 kBtu (in total). The average electricity consumption is 1.06 * 1011 kBtu (electricity) / 57,773,738 (people) = 1,838 kBtu (electricity) / person. The average gas consumption is 1.83 * 1011 kBtu (gas consumption) / 52,940,106 (people) = 3,456 kBtu (gas consumption) / person.
 
-
+We have different values for the average annual electricity and gas consumption per customer.  I think this is because you divided total average electricity or gas by the sum of all the customers over 12 months, whereas I took the average of the customers per month.  I think in the method you use the result is counting a single customer multiple times.
 
 #### Q5: How would you explain the results of this chart to an average property owner in Northern California? What would be the value of conducting further "seasonal" analyses of energy use, compared to "year-long" analyses, and how would you define seasonal boundaries?
 
@@ -47,7 +48,7 @@ Based on the trends, we see that gas is used more in the beginning and end of th
 •	Summer – 6, 7, 8
 •	Fall – 9, 10, 11
 
-
+I didn't really see the change in electricity use by month as that significant.  In response to your hypothesis, I would attribute the increase in gas for months 1-3 and 11-12 to the use of heating due to the drop in temperature.  I didn't think to try to define seasonal boundaries based on trends in energy consumption that's really interesting and a good idea.
 
 
 #### Q6: Explain your choice of formula for "avgkbtu".
@@ -60,7 +61,7 @@ I added the total energy consumption of electricity and gas, over the course of 
 
 Subsequently, I summed the amount of customers per month, over the year. This was performed by summing the electricity customers and gas customers over the year, then taking the maximum of the two to best represent the population. I divided this value by twelve, because these same customers will be ordering across every month. This was the denominator in my equation.
 
-
+Your choice for determining the number of customers assumes either all gas or all electricity customers also use either gas or electricity.  That said I don't think that is an unreasonable assumption to make.  My attempt to resolve the issue of unitentionally double counting customers was to average the averages.
 
 #### Q7 Paste a publicly viewable link to your Slides.
 
@@ -74,8 +75,7 @@ I’m surprised that the energy consumption of Palo Alto is low compared to othe
 
 However, I am not surprised that the per capita energy consumption is high. An individual in Palo Alto owns great wealth (e.g. car, home, phones) that requires great energy consumption and an individual can probably pay for the proper maintenance.
 
-
-
+I attributed the high energy consumption per capita to Stanford, although I think income is probably also related to energy use.  I didn't even think about the fact that if you use an electric car your electricity use is going to be higher.
 
 #### Q9 Any other reactions to completing Pass One? What was especially challenging or surprising in the workflow? How might you expand on this analysis if you had more time?
 
